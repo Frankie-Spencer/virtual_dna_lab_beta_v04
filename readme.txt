@@ -1,4 +1,6 @@
-This is a testing beta version for virtual DNA lab project. A software tool for visualization and analysis of simulated raw outputs of NFsim by Michael Sneddon http://michaelsneddon.net/nfsim/.  
+This is a testing beta version for virtual DNA lab project. 
+A software tool for visualization and analysis of simulated raw outputs of NFsim 
+by Michael Sneddon http://michaelsneddon.net/nfsim/.  
 
 Developed by Frankie Spencer,
 Project led by Dr. Eugen Czeizler,
