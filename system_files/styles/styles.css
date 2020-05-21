@@ -1,0 +1,297 @@
+
+.body{
+    margin: auto;
+    text-align: center;
+    #border: 4px solid green;
+    background-color: azure;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+}
+#page{
+    width: 960px;
+    text-align: left;
+    margin: 10px auto 20px auto;
+    background-color: #0c0c0c;
+}
+#sidebar{
+    float: left;
+    width: 200px;
+    border: 2px solid #665;
+}
+#content{
+    float: left;
+    width: 600px;
+    border: 2px solid #f05;
+    padding: 10px;
+}
+.card_complex_standard {
+    /* Add shadows to create the "card" effect */
+    #box-shadow: 0 4px 4px 0 rgba(0,0,0,0.2);
+    border-radius: 10px;
+    background-color: skyblue;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    color: black;
+    text-align: center;
+    #font-weight: bold;
+
+    display: block;
+    text-decoration:  none;
+    #width: max-content;
+    margin: auto;
+    #size: auto;
+    #width: intrinsic;           /* Safari/WebKit uses a non-standard name */
+    width: -moz-max-content;
+    width: -webkit-max-content;
+    width: -ms-max-content;
+
+
+}
+.card_complex_standard:hover {
+    #box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.2);
+    background-color: cornflowerblue;
+}
+.card_complex_advanced {
+    /* Add shadows to create the "card" effect */
+    #box-shadow: 0 4px 4px 0 rgba(0,0,0,0.2);
+    border-radius: 10px;
+    background-color: cadetblue;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    color: black;
+    text-align: center;
+    #font-weight: bold;
+
+    display: block;
+    text-decoration:  none;
+    #width: max-content;
+    margin: auto;
+    #size: auto;
+    #width: intrinsic;           /* Safari/WebKit uses a non-standard name */
+    width: -moz-max-content;
+    width: -webkit-max-content;
+    width: -ms-max-content;
+
+
+}
+.card_complex_advanced:hover {
+    #box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.2);
+    background-color: #4c7e80;
+}
+
+.card_complex_advanced_highlighted {
+    /* Add shadows to create the "card" effect */
+    #box-shadow: 0 4px 4px 0 rgba(0,0,0,0.2);
+    border-radius: 10px;
+    background-color: #ff7f7f;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    color: black;
+    text-align: center;
+    #font-weight: bold;
+
+    display: block;
+    text-decoration:  none;
+    #width: max-content;
+    margin: auto;
+    #size: auto;
+    #width: intrinsic;           /* Safari/WebKit uses a non-standard name */
+    width: -moz-max-content;
+    width: -webkit-max-content;
+    width: -ms-max-content;
+
+
+}
+.card_complex_advanced_highlighted:hover {
+    #box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.2);
+    background-color: #ff3232;
+}
+
+.copy_number {
+    /* Add shadows to create the "card" effect */
+    #box-shadow: 0 4px 4px 0 rgba(0,0,0,0.2);
+    border-radius: 10px;
+    background-color: lightgray;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 2px;
+    padding-top: 2px;
+    color: midnightblue;
+    text-align: center;
+    font-weight: bold;
+    font-size: 11pt;
+
+    display: block;
+    text-decoration:  none;
+    #width: max-content;
+    margin: auto;
+    #size: auto;
+    #width: intrinsic;           /* Safari/WebKit uses a non-standard name */
+    width: -moz-max-content;
+    width: -webkit-max-content;
+    width: -ms-max-content;
+
+}
+
+.stats_card {
+    /* Add shadows to create the "card" effect */
+    #box-shadow: 0 4px 4px 0 rgba(0,0,0,0.2);
+    #border-radius: 10px;
+    background-color: #d6ebf2;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 2px;
+    padding-top: 2px;
+    color: midnightblue;
+    text-align: center;
+    font-weight: bold;
+    font-size: 11pt;
+
+    display: block;
+    text-decoration:  none;
+    #width: max-content;
+    margin: auto;
+    #size: auto;
+    #width: intrinsic;           /* Safari/WebKit uses a non-standard name */
+    width: -moz-max-content;
+    width: -webkit-max-content;
+    width: -ms-max-content;
+
+}
+
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+.card_agent {
+    /* Add shadows to create the "card" effect */
+    #box-shadow: inset 2px 1px 1px 1px rgba(0.2,0.2,0.2,0.4);
+    box-shadow: inset 0 0 6px #4d4d4d;
+    #box-shadow: 0 4px 4px 0 rgba(0,0,0,0.1);
+    border-radius: 30px;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 2px;
+    padding-bottom: 1px;
+    background-color: white;
+    font-size: 13pt;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    #margin: auto;
+
+}
+
+/* On mouse-over, add a deeper shadow */
+
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+.card_agent .agent_text {
+    visibility: hidden;
+    width: auto;
+    background-color: gray;
+    opacity: 0.9;
+    color: white;
+    text-align: center;
+    font-size: 14pt;
+    border-radius: 6px;
+    padding: 5px 5px;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+}
+
+.card_agent:hover .agent_text {
+    visibility: visible;
+    position: marker;
+    margin-left: -20px;
+    margin-top: -34px;
+}
+
+.card_complex_standard .complex_text {
+    visibility: hidden;
+    width: auto;
+    background-color: cornflowerblue;
+    color: white;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 5px;
+
+    /* Position the tooltip */
+    position: absolute;
+    #cursor: pointer;
+    #text-align:left;
+    z-index: 1;
+}
+
+.card_complex_advanced .complex_text {
+    visibility: hidden;
+    width: auto;
+    background-color: #4c7e80;
+    color: white;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 5px;
+
+    /* Position the tooltip */
+    position: absolute;
+    #cursor: pointer;
+    #text-align:left;
+    z-index: 1;
+}
+
+.card_complex_advanced_highlighted .complex_text {
+    visibility: hidden;
+    width: auto;
+    background-color: #ff3232;
+    color: white;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 5px;
+
+    /* Position the tooltip */
+    position: absolute;
+    #cursor: pointer;
+    #text-align:left;
+    z-index: 1;
+}
+
+.card_complex_standard:hover .complex_text {
+    visibility: visible;
+    position: marker;
+    font-size: 12.5pt;
+    margin-left: -180px;
+    margin-top: -5px;
+
+}
+
+.card_complex_advanced:hover .complex_text {
+    visibility: visible;
+    position: marker;
+    font-size: 12.5pt;
+    margin-left: -180px;
+    margin-top: -5px;
+
+}
+
+.card_complex_advanced_highlighted:hover .complex_text {
+    visibility: visible;
+    position: marker;
+    font-size: 12.5pt;
+    margin-left: -180px;
+    margin-top: -5px;
+
+}
