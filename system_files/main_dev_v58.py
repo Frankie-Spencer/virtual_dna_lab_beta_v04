@@ -737,7 +737,7 @@ class Ui_MainWindow(object):
             d_dir_path = self.lineEdit_visual_browse_des.text()
             get_adv = advanced_criteria if len(
                 advanced_criteria) != 0 and self.checkBox_visual_advanced.isChecked() else None
-            run = browse_and_parse_v03.open_file(s_file_path, d_dir_path, get_adv)
+            run = process_handler_v03.open_file(s_file_path, d_dir_path, get_adv)
 
             if isinstance(run[0], bool):
                 self.label_messages.setText(run[2] + ' file --- ' + run[1] + ' --- processed successfully ✔')
