@@ -1,6 +1,15 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'ui_v02.ui'
+#
+# Created by: PyQt5 UI code generator 5.11.3
+#
+# WARNING! All changes made in this file will be lost!
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialog
-from sys_cache.cache import read_s_loc, write_s_loc, read_d_loc, write_d_loc, read_browser_loc
+
+from sys_cache.cache import read_s_loc, write_s_loc, read_d_loc, write_d_loc, read_browser_loc, write_browser_loc
 import os, time, threading, webbrowser, shutil
 from dump_to_species_converter_v25 import dump_to_species
 import process_handler_v03
@@ -13,17 +22,17 @@ from multiprocessing.pool import ThreadPool
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         global write_edited_amount_g, write_edited_seq_g, advanced_criteria, advanced_criteria_text, ssdna_comp_list, \
-               imp_seq_temp, type_dic_ssdna_comp, vis_adv_ranges_g, \
-               run_kt_list_g, run_temper_data_g, run_time_data_g, run_annealing_g, run_kt_g, \
-               write_kt_list_g, write_kt_status_g, \
-               write_n_run_kt_validate, write_n_run_kt_validated_g
+            imp_seq_temp, type_dic_ssdna_comp, vis_adv_ranges_g, \
+            run_kt_list_g, run_temper_data_g, run_time_data_g, run_annealing_g, run_kt_g, \
+            write_kt_list_g, write_kt_status_g, \
+            validate_float, validated_float_g, validated_int_g
 
         run_kt_list_g, run_temper_data_g, run_time_data_g = {}, ['', '', ''], ['', '', '']
         run_kt_g, run_annealing_g = False, False
 
         write_kt_list_g, write_kt_status_g = {}, False
 
-        write_n_run_kt_validate, write_n_run_kt_validated_g = 'wktv', ''
+        validate_float, validated_float_g, validate_int, validated_int_g = 'vaf', '', 'vag', ''
 
         type_dic_ssdna_comp = {1: 'ssDNA(s)    ', 2: 'complex(es) ', 'spaces': int}
 
@@ -83,7 +92,7 @@ class Ui_MainWindow(object):
             if consent_for == 'write_reset' or consent_for == 'delete_folder' or 'delete_seq_comp':
                 consent_check.setWindowTitle('Warning!')
                 consent_check.setText(con_dic[consent_for])
-                consent_check.setStandardButtons(QMessageBox.Yes | QMessageBox.No)  # | QtWidgets.QMessageBox.Cancel)
+                consent_check.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
                 consent = consent_check.exec_()
 
                 return consent
@@ -131,30 +140,50 @@ class Ui_MainWindow(object):
             cus_file_name = self.lineEdit_custom_file_name.text()
 
             if os.path.isfile(source_path):
-                r_source = source_path.rsplit('/', 1)
-                source_name = r_source[1].rsplit('.', 1)[0]
-                f_extension = r_source[1].rsplit('.', 1)[1]
+                try:
+                    r_source = source_path.rsplit('/', 1)
+                    source_name = r_source[1].rsplit('.', 1)[0]
+                    f_extension = r_source[1].rsplit('.', 1)[1]
 
-                cus_checked = self.checkBox_custom_file_name.isChecked()
+                    cus_checked = self.checkBox_custom_file_name.isChecked()
 
-                default_file_name = source_name + '_VDNA' + '.' + f_extension
-                c_file_name = cus_file_name + '.' + f_extension
+                    default_file_name = source_name + '_VDNA' + '.' + f_extension
+                    c_file_name = cus_file_name + '.' + f_extension
 
-                name_dic = {True: c_file_name,
-                            False: default_file_name}
+                    name_dic = {True: c_file_name,
+                                False: default_file_name}
 
-                rewrite = r_source[0] + '/' + name_dic[cus_checked]
+                    rewrite = r_source[0] + '/' + name_dic[cus_checked]
 
-                if a == info_request:
-                    return [source_path, rewrite, name_dic[cus_checked]]
-                else:
-                    if not cus_checked:
-                        self.lineEdit_custom_file_name.setText(default_file_name[:-5])
+                    if a == info_request:
+                        return [source_path, rewrite, name_dic[cus_checked]]
+                    else:
+                        if not cus_checked:
+                            self.lineEdit_custom_file_name.setText(default_file_name[:-5])
+                except:
+                    pass
+
             else:
                 self.lineEdit_custom_file_name.setText('')
 
+        def validate_path_link(link):
+            chars = ['#']
+            chars_in_link = []
+
+            for c in link:
+                if c in chars:
+                    chars_in_link.append(c)
+            if chars_in_link == []:
+                return [True, '']
+
+            elif chars_in_link != []:
+                chars_list = '   ' + '  '.join(chars_in_link) + '   '
+                return [False, chars_list]
+
+
         def input_file_validations(file_path, validate_call_from):
-            global run_kt_list_g, write_kt_status_g, write_kt_list_g, write_kt_status_g
+
+            global run_kt_list_g, write_kt_status_g, write_kt_list_g, run_kt_status_g
 
             source_file_dic = {write_b_source: self.lineEdit_write_browse_source.text(),
                                run_b_source: self.lineEdit_run_browse_source.text(),
@@ -384,25 +413,47 @@ class Ui_MainWindow(object):
         def validate_and_update_buttons(tab):
 
             if tab == write_tab:
+                source_file_path = self.lineEdit_write_browse_source.text()
                 created_list = self.listWidget_write_list_created
                 list_all = [created_list.item(index).text() for index in range(created_list.count())]
                 cus_file_name = self.lineEdit_custom_file_name.text()
                 cus_checked = len(cus_file_name) > 0 if self.checkBox_custom_file_name.isChecked() else True
-                input_validations = input_file_validations(self.lineEdit_write_browse_source.text(),
-                                              write_b_source) == 'ready'
+
+                if os.path.isfile(source_file_path):
+                    validate_s_path_link = validate_path_link(source_file_path)
+                    if validate_s_path_link[0]:
+                        self.pushButton_write_advanced.setEnabled(True)
+                        self.checkBox_write_advanced.setDisabled(False)
+                        if cus_checked:
+                            if len(list_all) > 0:
+                                self.pushButton_write_submit_with.setEnabled(True)
+                                self.pushButton_write_submit_without.setEnabled(True)
+
+                            else:
+                                self.pushButton_write_submit_with.setDisabled(True)
+                                self.pushButton_write_submit_with.setDisabled(True)
+                                self.pushButton_write_submit_without.setDisabled(True)
+
+                        else:
+                            self.pushButton_write_submit_with.setDisabled(True)
+                            self.pushButton_write_submit_without.setDisabled(True)
+
+                    else:
+                        self.pushButton_write_advanced.setDisabled(True)
+                        self.checkBox_write_advanced.setDisabled(True)
+                        self.pushButton_write_submit_with.setDisabled(True)
+                        self.pushButton_write_submit_without.setDisabled(True)
+
+                else:
+                    self.pushButton_write_advanced.setDisabled(True)
+                    self.checkBox_write_advanced.setDisabled(True)
+                    self.pushButton_write_submit_with.setDisabled(True)
+                    self.pushButton_write_submit_without.setDisabled(True)
 
                 if len(list_all) > 0:
                     self.pushButton_write_reset_all.setEnabled(True)
-                    if input_validations and cus_checked:
-                        self.pushButton_write_submit_with.setEnabled(True)
-                        self.pushButton_write_submit_without.setEnabled(True)
-                    else:
-                        self.pushButton_write_submit_with.setDisabled(True)
-                        self.pushButton_write_submit_without.setDisabled(True)
                 else:
                     self.pushButton_write_reset_all.setDisabled(True)
-                    self.pushButton_write_submit_with.setDisabled(True)
-                    self.pushButton_write_submit_without.setDisabled(True)
 
                 if created_list.currentRow() == -1:
                     self.pushButton_write_delete.setDisabled(True)
@@ -417,12 +468,14 @@ class Ui_MainWindow(object):
                 else:
                     self.pushButton_write_add_sequence.setDisabled(True)
 
+                '''
                 if input_validations:
                     self.pushButton_write_advanced.setEnabled(True)
                     self.checkBox_write_advanced.setDisabled(False)
                 else:
                     self.pushButton_write_advanced.setDisabled(True)
                     self.checkBox_write_advanced.setDisabled(True)
+                '''
 
             elif tab == run_tab:
                 start_time = self.lineEdit_run_start_time.text()
@@ -435,56 +488,68 @@ class Ui_MainWindow(object):
                 ed_time = str(end_time)[-1] if len(str(end_time)) > 0 else None
 
                 if os.path.isfile(source_file_path):
-                    if source_file_path.rsplit('/', 1)[1].rsplit('.', 1)[1] == bngl_type:
-                        self.pushButton_run_advanced.setEnabled(True)
-                        self.checkBox_run_advanced.setDisabled(False)
-                        if os.path.isdir(des_dir_path):
-                            if start_time != '' and end_time != '' and n_dumps != '':
-                                if not st_time.endswith('.') and not ed_time.endswith('.'):
-                                    if float(start_time) != float(end_time):
-                                        if float(start_time) < float(end_time):
-                                            if float(end_time) > 0:
-                                                if int(n_dumps) > 0:
-                                                    self.pushButton_run_run.setEnabled(True)
-                                                    self.label_messages.setText('Program ready to run!')
-                                                    return True
+                    validate_s_path_link = validate_path_link(source_file_path)
+                    if validate_s_path_link[0]:
+                        if source_file_path.rsplit('/', 1)[1].rsplit('.', 1)[1] == bngl_type:
+                            self.pushButton_run_advanced.setEnabled(True)
+                            self.checkBox_run_advanced.setDisabled(False)
+                            if os.path.isdir(des_dir_path):
+                                validate_des_path_link = validate_path_link(des_dir_path)
+                                if validate_des_path_link[0]:
+                                    if start_time != '' and end_time != '' and n_dumps != '':
+                                        if not st_time.endswith('.') and not ed_time.endswith('.'):
+                                            if float(start_time) != float(end_time):
+                                                if float(start_time) < float(end_time):
+                                                    if float(end_time) > 0:
+                                                        if int(n_dumps) > 0:
+                                                            self.pushButton_run_run.setEnabled(True)
+                                                            self.label_messages.setText('Program ready to run!')
+                                                            return True
+
+                                                        else:
+                                                            self.pushButton_run_run.setDisabled(True)
+                                                            self.label_messages.setText('"# dump files" '
+                                                                                        'must be a positive value ✘')
+
+                                                    else:
+                                                        self.pushButton_run_run.setDisabled(True)
+                                                        self.label_messages.setText('"End time" '
+                                                                                    'must be a positive value ✘')
 
                                                 else:
                                                     self.pushButton_run_run.setDisabled(True)
-                                                    self.label_messages.setText('"# dump files" '
-                                                                                'must be a positive value ✘')
+                                                    self.label_messages.setText('"Start time" must be less than '
+                                                                                '"End time" ✘')
 
                                             else:
                                                 self.pushButton_run_run.setDisabled(True)
-                                                self.label_messages.setText('"End time" must be a positive value ✘')
+                                                self.label_messages.setText('"Start time" and "End time" '
+                                                                            'cannot be same ✘')
 
                                         else:
                                             self.pushButton_run_run.setDisabled(True)
-                                            self.label_messages.setText('"Start time" must be less than "End time" ✘')
+                                            self.label_messages.setText('Error found on some fields, please check ✘')
 
                                     else:
                                         self.pushButton_run_run.setDisabled(True)
-                                        self.label_messages.setText('"Start time" and "End time" cannot be same ✘')
+                                        self.label_messages.setText('Any of the below fields cannot be empty ✘')
 
                                 else:
                                     self.pushButton_run_run.setDisabled(True)
-                                    self.label_messages.setText('Error found on some fields, please check ✘')
 
                             else:
-                                self.pushButton_run_advanced.setEnabled(True)
                                 self.pushButton_run_run.setDisabled(True)
-                                self.label_messages.setText('Any of the below fields cannot be empty ✘')
+                                self.label_messages.setText('Save simulation outputs directory not selected ✘')
 
                         else:
-                            self.pushButton_run_advanced.setEnabled(True)
+                            self.checkBox_run_advanced.setDisabled(True)
+                            self.pushButton_run_advanced.setDisabled(True)
                             self.pushButton_run_run.setDisabled(True)
-                            self.label_messages.setText('Save simulation outputs directory not selected ✘')
-
+                            self.label_messages.setText('Input file error ✘, only "bngl" files accepted!')
                     else:
                         self.checkBox_run_advanced.setDisabled(True)
-                        self.pushButton_run_advanced.setDisabled(True)
                         self.pushButton_run_run.setDisabled(True)
-                        self.label_messages.setText('Input file error ✘, only "bngl" files accepted!')
+                        self.pushButton_run_advanced.setDisabled(True)
 
                 else:
                     self.checkBox_run_advanced.setDisabled(True)
@@ -528,29 +593,34 @@ class Ui_MainWindow(object):
 
                         self.pushButton_visual_delete.setEnabled(True)
 
-                if not os.path.isfile(source_file_path):
-                    self.pushButton_visual_visualize.setDisabled(True)
-                    self.label_messages.setText('Input dump/species file is not selected ✘')
+                if os.path.isfile(source_file_path):
+                    validate_s_path_link = validate_path_link(source_file_path)
+                    if validate_s_path_link[0]:
+                        if source_file_path.rsplit('/', 1)[1].rsplit('.', 1)[1] in accepted_types:
+                            if os.path.isdir(des_dir_path):
+                                validate_des_path_link = validate_path_link(des_dir_path)
+                                if validate_des_path_link[0]:
+                                    self.pushButton_visual_visualize.setEnabled(True)
+                                    self.label_messages.setText('Program ready to run!')
+                                    return True
 
-                elif os.path.isfile(source_file_path) and \
-                        source_file_path.rsplit('/', 1)[1].rsplit('.', 1)[1] not in accepted_types:
-                    self.pushButton_visual_visualize.setDisabled(True)
-                    self.label_messages.setText('Input file error ✘, only ".speceis" or ".0" files accepted!')
+                                else:
+                                    self.pushButton_visual_visualize.setDisabled(True)
 
-                    '''
-                    elif input_file_type in accepted_types:
-                        self.pushButton_visual_visualize.setEnabled(True)
-                        self.label_messages.setText(
-                            'Selected source file recognized as "' + dic_type[input_file_type] + '" file ✔')
-                    '''
-                elif not os.path.isdir(des_dir_path):
-                    self.pushButton_visual_visualize.setDisabled(True)
-                    self.label_messages.setText('Save simulation outputs directory not selected ✘')
+                            else:
+                                self.pushButton_visual_visualize.setDisabled(True)
+                                self.label_messages.setText('Save visualization outputs directory not selected ✘')
+
+                        else:
+                            self.pushButton_visual_visualize.setDisabled(True)
+                            self.label_messages.setText('Input file error ✘, only ".speceis" or ".0" files accepted!')
+
+                    else:
+                        self.pushButton_visual_visualize.setDisabled(True)
 
                 else:
-                    self.pushButton_visual_visualize.setEnabled(True)
-                    self.label_messages.setText('Program ready to run!')
-                    return True
+                    self.pushButton_visual_visualize.setDisabled(True)
+                    self.label_messages.setText('Input dump/species file is not selected ✘')
 
         def on_edit_source_path(call_from, tab):
             source_file_dic = {write_b_source: self.lineEdit_write_browse_source.text(),
@@ -559,8 +629,36 @@ class Ui_MainWindow(object):
 
             file_path = source_file_dic[call_from]
 
-            if os.path.isfile(file_path):
-                input_file_validations(file_path, call_from)
+            validate_path_status = validate_path_link(file_path)
+
+            if validate_path_status[0]:
+                if os.path.isfile(file_path):
+                    self.label_messages.setText('')
+                    input_file_validations(file_path, call_from)
+            else:
+                self.label_messages.setText('Source path cannot include special character(s) ' + validate_path_status[1])
+
+            validate_and_update_buttons(tab)
+
+        def on_edit_des_dir(call_from, tab):
+            des_dir_dic = {run_b_des: self.lineEdit_run_browse_des.text(),
+                           visual_b_des: self.lineEdit_visual_browse_des.text()}
+
+            des_path = des_dir_dic[call_from]
+
+            validate_path_status = validate_path_link(des_path)
+
+            if os.path.isdir(des_path):
+                if validate_path_status[0]:
+                    write_d_loc(call_from, des_path)
+                    self.label_messages.setText('')
+                    if call_from == visual_b_des:
+                        update_history()
+                else:
+                    self.label_messages.setText('Save directory cannot include special character(s) ' +
+                                                validate_path_status[1])
+            else:
+                self.label_messages.setText('Save directory does not exists ✘, please try again!')
 
             validate_and_update_buttons(tab)
 
@@ -582,20 +680,6 @@ class Ui_MainWindow(object):
                                          import_seq: ['Import sequences from Dump/Species file',
                                                       'Dump/Species(*.0 *.species)']}
 
-            def validate_path(link):
-                chars = ['#']
-                chars_in_link = []
-
-                for c in link:
-                    if c in chars:
-                        chars_in_link.append(c)
-                if chars_in_link == []:
-                    return [True, '']
-
-                elif chars_in_link != []:
-                    chars_list = '   ' + '  '.join(chars_in_link) + '   '
-                    return [False, chars_list]
-
             if browse_call_from in browse_sources:
 
                 path = str(os.path.dirname(str(read_s_loc(browse_call_from))))
@@ -603,7 +687,7 @@ class Ui_MainWindow(object):
                                                            path, win_heading_and_file_type[browse_call_from][1])
 
                 if len(file_path) > 0:
-                    validate_path_status = validate_path(file_path)
+                    validate_path_status = validate_path_link(file_path)
 
                     if validate_path_status[0]:
                         if not browse_call_from == import_seq:
@@ -616,7 +700,8 @@ class Ui_MainWindow(object):
                         validate_and_update_buttons(tab)
 
                     else:
-                        self.label_messages.setText('Path cannot include special character(s) ' + validate_path_status[1])
+                        self.label_messages.setText('Source path cannot include special character(s) ' +
+                                                    validate_path_status[1])
 
             elif browse_call_from in browse_des:
                 path = str(read_d_loc(browse_call_from))
@@ -624,7 +709,7 @@ class Ui_MainWindow(object):
 
                 cur_des_path = self.lineEdit_visual_browse_des.text()
 
-                validate_path_status = validate_path(dir_path)
+                validate_path_status = validate_path_link(dir_path)
 
                 if validate_path_status[0]:
                     if os.path.isdir(dir_path):
@@ -643,7 +728,8 @@ class Ui_MainWindow(object):
                     validate_and_update_buttons(tab)
 
                 else:
-                    self.label_messages.setText('Path cannot include special character(s) ' + validate_path_status[1])
+                    self.label_messages.setText('Save directory cannot include special character(s) ' +
+                                                validate_path_status[1])
 
         @run_in_thread
         def run_visualisation(a):
@@ -703,7 +789,7 @@ class Ui_MainWindow(object):
 
                     if warning == 16384:
                         shutil.rmtree(selection_link)
-                        self.label_messages.setText(folder_name + ' --- deleted ✔')
+                        self.label_messages.setText('Simulation outputs folder --- ' + folder_name + ' --- deleted ✔')
                         update_history()
 
                     else:
@@ -852,20 +938,21 @@ class Ui_MainWindow(object):
                          run_sim_end: self.lineEdit_run_sim_end,
                          write_edit_amount: write_edited_amount_g,
                          vis_adv_ranges: vis_adv_ranges_g,
-                         write_n_run_kt_validate: write_n_run_kt_validated_g}
+                         validate_float: validated_float_g,
+                         validate_int: validated_int_g}
 
-            child_window = [write_edit_amount, vis_adv_ranges, write_n_run_kt_validate]
+            child_window = [write_edit_amount, vis_adv_ranges, validate_float, validate_int]
 
             amount_in = str(place_dic[call_from].text()) if call_from not in child_window \
                 else str(place_dic[call_from])
 
-            only_int_type = [write_n_seq, run_n_dumps, write_edit_amount, vis_adv_ranges]
-            only_float_type = [run_start_time, run_sim_end, write_n_run_kt_validate]
+            only_int_type = [write_n_seq, run_n_dumps, write_edit_amount, vis_adv_ranges, validate_int]
+            only_float_type = [run_start_time, run_sim_end, validate_float]
 
             if call_from in only_int_type:
 
                 def set_amount_values(v):
-                    global write_edited_amount_g, vis_adv_ranges_g
+                    global write_edited_amount_g, vis_adv_ranges_g, validated_int_g
 
                     if amount_in != v:
                         if call_from not in child_window:
@@ -875,6 +962,8 @@ class Ui_MainWindow(object):
                                 write_edited_amount_g = v
                             elif call_from == vis_adv_ranges:
                                 vis_adv_ranges_g = v
+                            elif call_from == validate_int:
+                                validated_int_g = v
 
                 new_seq = ''
                 if len(amount_in) >= 1:
@@ -893,13 +982,13 @@ class Ui_MainWindow(object):
             if call_from in only_float_type:
 
                 def set_amount_values(v):
-                    global write_n_run_kt_validated_g
+                    global validated_float_g
 
                     if amount_in != v:
                         if call_from not in child_window:
                             place_dic[call_from].setText(v)
                         elif call_from in child_window:
-                            write_n_run_kt_validated_g = v
+                            validated_float_g = v
 
                 new_seq_num = ''
                 if len(amount_in) >= 1:
@@ -1303,6 +1392,17 @@ class Ui_MainWindow(object):
                     if item_now.text() != vis_adv_ranges_g:
                         item_now.setText(vis_adv_ranges_g)
 
+                    '''
+                    if len(str(item_now.text())) >= 1:
+                        try:
+                            if type(int(item_now.text())) == int:
+                                int_type = int(item_now.text())
+                                if int_type < 1:
+                                    item_now.setText('1')
+                        except:
+                            item_now.setText('')
+                    '''
+
                 elif place_id == 'unbound_from' or place_id == 'unbound_to':
                     if len(str(item_now.text())) >= 1:
                         try:
@@ -1473,8 +1573,8 @@ class Ui_MainWindow(object):
                     consent_check = QMessageBox()
                     con_dic = {'reset_criteria_list': 'Resetting will remove all created criteria. '
                                                       'This action cannot be undone!' + '\n' + '\n'
-                                                                                               'Click "Yes" to reset for a fresh start\n'
-                                                                                               'Click "No" to return back', }
+                                                      'Click "Yes" to reset for a fresh start\n'
+                                                      'Click "No" to return back', }
 
                     consent_check.setWindowTitle('Warning!')
                     consent_check.setText(con_dic[consent_for])
@@ -2177,17 +2277,26 @@ class Ui_MainWindow(object):
 
                 update_save_button()
 
-            def validate_cell_values(call_from):
-                global write_n_run_kt_validated_g
+            def validate_cell_values(call_from, int_or_float):
+                global validated_float_g, validated_int_g
 
                 current_item = kt_n_ann_cells[call_from].text()
 
-                write_n_run_kt_validated_g = current_item
-                validate_num(write_n_run_kt_validate, '')
+                if int_or_float == 'float':
+                    validated_float_g = current_item
+                    validate_num(validate_float, '')
 
-                if current_item != write_n_run_kt_validated_g:
-                    kt_n_ann_cells[call_from].setText(write_n_run_kt_validated_g)
-                    write_n_run_kt_validated_g = ''
+                    if current_item != validated_float_g:
+                        kt_n_ann_cells[call_from].setText(validated_float_g)
+                        validated_float_g = ''
+
+                elif int_or_float == 'int':
+                    validated_int_g = current_item
+                    validate_num(validate_int, '')
+
+                    if current_item != validated_int_g:
+                        kt_n_ann_cells[call_from].setText(validated_int_g)
+                        validated_int_g = ''
 
                 if call_from in auto_cal_list:
                     auto_cal()
@@ -2654,9 +2763,9 @@ class Ui_MainWindow(object):
             label_run_kinetic_values.setAlignment(QtCore.Qt.AlignCenter)
             label_run_kinetic_values.setObjectName("label_run_kinetic_values")
             gridLayout_run_parameters_entry.addWidget(label_run_kinetic_values, 0, 0, 1, 1)
-            pushButton_7 = QtWidgets.QPushButton(frame_2)
-            pushButton_7.setObjectName("pushButton_7")
-            gridLayout_run_parameters_entry.addWidget(pushButton_7, 8, 6, 1, 2)
+            # pushButton_7 = QtWidgets.QPushButton(frame_2)
+            # pushButton_7.setObjectName("pushButton_7")
+            # gridLayout_run_parameters_entry.addWidget(pushButton_7, 8, 6, 1, 2)
             pushButton_reset_to_originals = QtWidgets.QPushButton(frame_2)
             pushButton_reset_to_originals.setObjectName("pushButton_reset_to_originals")
             gridLayout_run_parameters_entry.addWidget(pushButton_reset_to_originals, 7, 6, 1, 2)
@@ -2951,7 +3060,7 @@ class Ui_MainWindow(object):
                 label_run_temp.setText(_translate("Dialog", "Temp"))
                 label_run_tempereture.setText(_translate("Dialog", "Temperature"))
                 label_run_kinetic_values.setText(_translate("Dialog", "Kinetic values"))
-                pushButton_7.setText(_translate("Dialog", "????"))
+                # pushButton_7.setText(_translate("Dialog", "????"))
                 pushButton_reset_to_originals.setText(_translate("Dialog", "Reset to originals"))
                 pushButton_set_vdna_defaults.setText(_translate("Dialog", "Set VDNA defaults"))
                 label_run_k1.setText(_translate("Dialog", "k 1"))
@@ -2998,24 +3107,24 @@ class Ui_MainWindow(object):
             pushButton_cancel.clicked.connect(close_dialog)
             checkBox_annealing.clicked.connect(lambda: activate_annealing('u_clicked'))
 
-            lineEdit_run_temp_p.textChanged.connect(lambda: validate_cell_values('Temp_p'))
-            lineEdit_run_p_k1.textChanged.connect(lambda: validate_cell_values('k1_p'))
-            lineEdit_run_p_k2.textChanged.connect(lambda: validate_cell_values('k2_P'))
-            lineEdit_run_p_k3.textChanged.connect(lambda: validate_cell_values('k3_p'))
-            lineEdit_run_p_k4.textChanged.connect(lambda: validate_cell_values('k4_p'))
-            lineEdit_run_p_k5.textChanged.connect(lambda: validate_cell_values('k5_p'))
-            lineEdit_run_p_k6.textChanged.connect(lambda: validate_cell_values('k6_p'))
-            lineEdit_run_p_k7.textChanged.connect(lambda: validate_cell_values('k7_p'))
-            lineEdit_run_p_k8.textChanged.connect(lambda: validate_cell_values('k8_p'))
-            lineEdit_run_p_k9.textChanged.connect(lambda: validate_cell_values('k9_P'))
-            lineEdit_run_p_k10.textChanged.connect(lambda: validate_cell_values('k10_p'))
-            lineEdit_run_p_k11.textChanged.connect(lambda: validate_cell_values('k11_p'))
-            lineEdit_run_start_time.textChanged.connect(lambda: validate_cell_values('run_start_time'))
-            lineEdit_run_time_per_stage.textChanged.connect(lambda: validate_cell_values('run_time_per_stage'))
-            lineEdit_run_dumps_per_stage.textChanged.connect(lambda: validate_cell_values('run_dumps_per_stage'))
-            lineEdit_run_start_temp.textChanged.connect(lambda: validate_cell_values('run_start_temp'))
-            lineEdit_run_d_temp.textChanged.connect(lambda: validate_cell_values('run_d_temp'))
-            lineEdit_run_end_temp.textChanged.connect(lambda: validate_cell_values('run_end_temp'))
+            lineEdit_run_temp_p.textChanged.connect(lambda: validate_cell_values('Temp_p', 'float'))
+            lineEdit_run_p_k1.textChanged.connect(lambda: validate_cell_values('k1_p', 'float'))
+            lineEdit_run_p_k2.textChanged.connect(lambda: validate_cell_values('k2_P', 'float'))
+            lineEdit_run_p_k3.textChanged.connect(lambda: validate_cell_values('k3_p', 'float'))
+            lineEdit_run_p_k4.textChanged.connect(lambda: validate_cell_values('k4_p', 'float'))
+            lineEdit_run_p_k5.textChanged.connect(lambda: validate_cell_values('k5_p', 'float'))
+            lineEdit_run_p_k6.textChanged.connect(lambda: validate_cell_values('k6_p', 'float'))
+            lineEdit_run_p_k7.textChanged.connect(lambda: validate_cell_values('k7_p', 'float'))
+            lineEdit_run_p_k8.textChanged.connect(lambda: validate_cell_values('k8_p', 'float'))
+            lineEdit_run_p_k9.textChanged.connect(lambda: validate_cell_values('k9_P', 'float'))
+            lineEdit_run_p_k10.textChanged.connect(lambda: validate_cell_values('k10_p', 'float'))
+            lineEdit_run_p_k11.textChanged.connect(lambda: validate_cell_values('k11_p', 'float'))
+            lineEdit_run_start_time.textChanged.connect(lambda: validate_cell_values('run_start_time', 'float'))
+            lineEdit_run_time_per_stage.textChanged.connect(lambda: validate_cell_values('run_time_per_stage', 'float'))
+            lineEdit_run_dumps_per_stage.textChanged.connect(lambda: validate_cell_values('run_dumps_per_stage', 'int'))
+            lineEdit_run_start_temp.textChanged.connect(lambda: validate_cell_values('run_start_temp', 'float'))
+            lineEdit_run_d_temp.textChanged.connect(lambda: validate_cell_values('run_d_temp', 'float'))
+            lineEdit_run_end_temp.textChanged.connect(lambda: validate_cell_values('run_end_temp', 'float'))
 
             activate_annealing('')
             set_previous()
@@ -3128,16 +3237,16 @@ class Ui_MainWindow(object):
                 write_kt_list_g = k_list_values
 
             def validate_cell_values(call_from):
-                global write_n_run_kt_validated_g
+                global validated_float_g
 
                 current_item = kt_cells[call_from].text()
 
-                write_n_run_kt_validated_g = current_item
-                validate_num(write_n_run_kt_validate, '')
+                validated_float_g = current_item
+                validate_num(validate_float, '')
 
-                if current_item != write_n_run_kt_validated_g:
-                    kt_cells[call_from].setText(write_n_run_kt_validated_g)
-                    write_n_run_kt_validated_g = ''
+                if current_item != validated_float_g:
+                    kt_cells[call_from].setText(validated_float_g)
+                    validated_float_g = ''
 
                 update_save_button()
 
@@ -3409,9 +3518,9 @@ class Ui_MainWindow(object):
             lineEdit_write_vdna_k6.setReadOnly(True)
             lineEdit_write_vdna_k6.setObjectName("lineEdit_write_vdna_k6")
             gridLayout_write_parameters_entry.addWidget(lineEdit_write_vdna_k6, 6, 4, 1, 1)
-            pushButton_7 = QtWidgets.QPushButton(frame_2)
-            pushButton_7.setObjectName("pushButton_7")
-            gridLayout_write_parameters_entry.addWidget(pushButton_7, 8, 6, 1, 2)
+            # pushButton_7 = QtWidgets.QPushButton(frame_2)
+            # pushButton_7.setObjectName("pushButton_7")
+            # gridLayout_write_parameters_entry.addWidget(pushButton_7, 8, 6, 1, 2)
             label_write_k1 = QtWidgets.QLabel(frame_2)
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
             sizePolicy.setHorizontalStretch(0)
@@ -3631,7 +3740,7 @@ class Ui_MainWindow(object):
                 label_write_present_values.setText(_translate("Dialog", "Present values"))
                 label_write_tempereture.setText(_translate("Dialog", "Tempereture"))
                 pushButton_set_vdna_defaults.setText(_translate("Dialog", "Set VDNA defaults"))
-                pushButton_7.setText(_translate("Dialog", "????"))
+                # pushButton_7.setText(_translate("Dialog", "????"))
                 label_write_k1.setText(_translate("Dialog", "k 1"))
                 pushButton_reset_to_originals.setText(_translate("Dialog", "Reset to originals"))
                 label_write_kinetic_values.setText(_translate("Dialog", "Kinetic values"))
@@ -4533,7 +4642,7 @@ class Ui_MainWindow(object):
         self.lineEdit_run_n_dumps.textChanged.connect(lambda: validate_num(run_n_dumps, run_tab))
         self.lineEdit_run_sim_end.textChanged.connect(lambda: validate_num(run_sim_end, run_tab))
         self.lineEdit_run_browse_source.textChanged.connect(lambda: on_edit_source_path(run_b_source, run_tab))
-        self.lineEdit_run_browse_des.textChanged.connect(lambda: validate_and_update_buttons(run_tab))
+        self.lineEdit_run_browse_des.textChanged.connect(lambda: on_edit_des_dir(run_b_des, run_tab))
         self.pushButton_run_run.clicked.connect(run_bngl)
         self.pushButton_run_advanced.clicked.connect(run_advanced)
         self.pushButton_run_advanced.setDisabled(True)
@@ -4555,7 +4664,7 @@ class Ui_MainWindow(object):
         self.lineEdit_visual_browse_source.textChanged.connect(lambda: on_edit_source_path(visual_b_source, visual_tab))
         self.lineEdit_visual_browse_des.textChanged.connect(lambda: validate_and_update_buttons(visual_tab))
         self.listWidget_visual_history_list.itemClicked.connect(lambda: validate_and_update_buttons(visual_tab))
-        self.lineEdit_visual_browse_des.textChanged.connect(update_history)
+        self.lineEdit_visual_browse_des.textChanged.connect(lambda: on_edit_des_dir(visual_b_des, visual_tab))
         self.pushButton_visual_advanced.clicked.connect(advanced_options)
 
         def restore_previous_session():
@@ -4576,6 +4685,14 @@ class Ui_MainWindow(object):
                 if os.path.isdir(dir_link):
                     des_cells[1].setText(dir_link)
 
+        '''
+        def set_browser():
+            main_dir = os.path.abspath(__file__).rsplit('\\', 2)[0]
+            chrome_link = main_dir + '\\chrome-win32\\chrome.exe'
+            write_browser_loc(chrome_link)
+        '''
+
+        # set_browser()
         restore_previous_session()
 
     def retranslateUi(self, MainWindow):
