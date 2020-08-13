@@ -2,7 +2,7 @@ This is a testing beta version for virtual DNA lab project.
 A software tool for visualization and analysis of simulated raw outputs of NFsim simulater 
 by Michael Sneddon http://michaelsneddon.net/nfsim/.  
 
-Developed by Frankie Spencer,
+Program developed by Frankie Spencer,
 Project led by Dr. Eugen Czeizler,
 
 At: Algorithms and Software in Bio-Engineering (AlgoBio), 
@@ -13,6 +13,7 @@ At: Algorithms and Software in Bio-Engineering (AlgoBio),
 Runs only on Windows 7 or later versions
 
 Requirements
+Python 3.7.0 installed
 Active perl 64 - https://www.activestate.com/products/perl/downloads/
 NFsim_v1.11 - http://michaelsneddon.net/nfsim/download/
 
