@@ -21,4 +21,4 @@ copy the file package as folders to virtual_dna_software_package_v04, rename fol
 Perl64
 NFsim_v1.11
 
-simply run by run.bat file 
+simply run by run.bat file
